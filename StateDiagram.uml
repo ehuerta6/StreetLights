@@ -1,0 +1,64 @@
+@startuml TrafficLightStateDiagram
+
+title Traffic Light System - State Diagram
+
+state SystemOff
+state SystemRunning
+
+[*] --> SystemOff : System Created
+SystemOff --> SystemRunning : start()
+SystemRunning --> [*] : User selects Exit
+
+state SystemRunning {
+    state NormalMode
+    state EmergencyMode
+    
+    [*] --> NormalMode : Intersection initialized
+    
+    NormalMode --> EmergencyMode : setEmergencyMode(true)
+    EmergencyMode --> NormalMode : setEmergencyMode(false)
+    
+    state NormalMode {
+        state Phase1 : NS Green / EW Red
+        state Phase2 : NS Yellow / EW Red
+        state Phase3 : NS Red / EW Green
+        state Phase4 : NS Red / EW Yellow
+        
+        [*] --> Phase1
+        
+        Phase1 --> Phase2 : cycle()
+        Phase2 --> Phase3 : cycle()
+        Phase3 --> Phase4 : cycle()
+        Phase4 --> Phase1 : cycle()
+    }
+    
+    state EmergencyMode {
+        state AllRed : All Lights RED
+        state AllRed : Cycling BLOCKED
+        
+        [*] --> AllRed
+        AllRed --> AllRed : cycle() [Warning]
+    }
+}
+
+note right of SystemRunning
+  User Menu Actions:
+  1. Cycle
+  2. Set Emergency
+  3. Show Status
+  4. Exit
+end note
+
+note right of EmergencyMode
+  Emergency Mode:
+  - All lights forced to RED
+  - Cycling is blocked
+  - Exits to Phase 1 when deactivated
+end note
+
+note right of NormalMode
+  Normal Cycle:
+  Phase1 -> Phase2 -> Phase3 -> Phase4 -> repeat
+end note
+
+@enduml
